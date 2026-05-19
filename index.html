@@ -1,0 +1,723 @@
+import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Search,
+  Globe2,
+  Send,
+  Building2,
+  CreditCard,
+  FileText,
+  ShieldCheck,
+  Landmark,
+  HelpCircle,
+  CheckCircle2,
+  AlertTriangle,
+  ArrowRight,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Users,
+  WalletCards,
+  ReceiptText,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+const services = [
+  {
+    title: "Foreign Remittance",
+    category: "Outward Payment",
+    icon: Send,
+    summary:
+      "Send approved international payments for education, import of goods, medical treatment, tour refund, and other service-related purposes.",
+    whoCanUse: "BNB account holders, traders, government agencies, and approved individuals.",
+    keyPoints: [
+      "A BNB account is required for outward remittance.",
+      "Business and import-related payments should be routed through a current account.",
+      "BTFN application is required for most cross-border trade and service payments.",
+      "Personal payments are generally not processed unless approved by the Royal Monetary Authority where required.",
+    ],
+    documents: [
+      "Duly signed MT103 form",
+      "Undertaking letter where required",
+      "Invoice with beneficiary account details",
+      "Passport or student ID for education payments",
+      "Valid business license for import-related payments",
+      "Contract agreement where applicable",
+      "RMA approval where required",
+    ],
+    steps: [
+      "Prepare the required documents based on your payment purpose.",
+      "Create or submit the BTFN application where applicable.",
+      "Submit the MT103 form and supporting documents to BNB.",
+      "BNB verifies documents, account balance, exchange rate, and compliance requirements.",
+      "After approval, the international payment is processed through SWIFT.",
+    ],
+    charges:
+      "Bank charges are generally calculated based on the transfer amount, exchange rate, and applicable minimum charge. Foreign bank charges may also apply depending on the payment route.",
+  },
+  {
+    title: "Inward Remittance",
+    category: "Receive Money",
+    icon: WalletCards,
+    summary:
+      "Receive international funds into a BNB account from overseas senders through banking channels.",
+    whoCanUse: "BNB account holders, agencies, merchants, hotels, airlines, and approved recipients.",
+    keyPoints: [
+      "Funds can be credited to BTN or foreign currency accounts depending on the account type and currency received.",
+      "Correct beneficiary name, account number, bank details, and purpose of payment help avoid delays.",
+      "BNB may contact the customer if sender details, beneficiary details, or payment purpose is incomplete.",
+      "Unclaimed or unclear payments may be transferred to sundry payable as per internal and regulatory requirements.",
+    ],
+    documents: [
+      "BNB account details of the receiver",
+      "Sender details and remittance copy where available",
+      "Purpose of payment",
+      "Supporting documents if requested by the bank",
+      "Indemnity form for unclear or unknown payments where required",
+    ],
+    steps: [
+      "The overseas bank sends payment instructions to BNB.",
+      "BNB verifies the incoming SWIFT/payment message.",
+      "The bank checks beneficiary details, purpose, exchange rate, charges, and compliance requirements.",
+      "If all details are clear, the receiver’s account is credited.",
+      "If details are incomplete, BNB may follow up before crediting the fund.",
+    ],
+    charges:
+      "Charges depend on the source bank, currency, account type, and purpose. Some tour-related payments may have different treatment.",
+  },
+  {
+    title: "MoneyGram Receive Service",
+    category: "Money Transfer",
+    icon: ReceiptText,
+    summary:
+      "Receive MoneyGram transfers from abroad through BNB branches and extension offices.",
+    whoCanUse: "Individual receivers. Business entities and organizations are not eligible to claim MoneyGram transfers.",
+    keyPoints: [
+      "Bhutan is enabled for MoneyGram receipt only.",
+      "MoneyGram is designed for fast cash pickup, usually a short-time service once details are verified.",
+      "The receiver must provide the correct reference number and identification.",
+      "BNB account holders may use online claim where available, but third-party account credit is restricted.",
+    ],
+    documents: [
+      "Completed MoneyGram receive form",
+      "Valid CID copy of the receiver",
+      "8-digit MoneyGram reference number",
+      "Sender details",
+      "BNB account details for account credit request where allowed",
+    ],
+    steps: [
+      "Visit a BNB branch or extension office, or use online claim if eligible.",
+      "Submit the receive form, reference number, sender details, and CID.",
+      "BNB verifies the transaction and receiver information.",
+      "After verification, the amount is paid in cash or credited to the eligible BNB account.",
+    ],
+    charges:
+      "Receiver-side charges, if any, should be confirmed with the branch at the time of claim.",
+  },
+  {
+    title: "RIA Money Transfer Receive Service",
+    category: "Money Transfer",
+    icon: Globe2,
+    summary:
+      "Receive money sent through RIA Money Transfer from overseas locations, online channels, or the RIA app.",
+    whoCanUse: "Individual receivers. Transfers in the name of business entities or organizations are not eligible for claim.",
+    keyPoints: [
+      "Bhutan is enabled for RIA receipt only through BNB.",
+      "Cash pickup and account deposit may be available depending on transaction type and customer eligibility.",
+      "Deposit to a third-party account is not permitted.",
+      "The receiver information must match the transfer order.",
+    ],
+    documents: [
+      "RIA PIN/reference number",
+      "Valid identification/CID",
+      "Sender name and receiver name",
+      "BNB account details if account credit is requested and allowed",
+    ],
+    steps: [
+      "Provide the RIA PIN/reference number and identification to BNB.",
+      "BNB checks sender and receiver information in the RIA system.",
+      "If the details match, the transaction is processed.",
+      "The receiver collects cash or receives eligible account credit.",
+    ],
+    charges:
+      "Applicable fees and exchange treatment should be confirmed with BNB at the time of transaction.",
+  },
+  {
+    title: "Instant Cash Receive Service",
+    category: "Money Transfer",
+    icon: Clock,
+    summary:
+      "Receive Instant Cash transfers sent from participating countries and agent networks worldwide.",
+    whoCanUse: "Individual receivers. Business entities and organizations are not eligible to claim Instant Cash transfers.",
+    keyPoints: [
+      "Bhutan is enabled for Instant Cash receipt only.",
+      "Receiver must provide the correct 9-digit Instant Cash reference number.",
+      "The transfer can be paid in cash or credited to the receiver’s BNB account where allowed.",
+      "Account credit must be to the recipient’s own BNB account, not a third-party account.",
+    ],
+    documents: [
+      "Completed Instant Cash receive form",
+      "Valid CID copy of the receiver",
+      "9-digit Instant Cash reference number",
+      "Sender details",
+      "BNB account number for eligible account credit request",
+    ],
+    steps: [
+      "Visit BNB with the receive form, CID, and reference number.",
+      "BNB verifies the transfer details and receiver information.",
+      "After successful verification, payment is processed.",
+      "The receiver collects cash or receives account credit where eligible.",
+    ],
+    charges:
+      "Confirm any applicable receiver-side charge or exchange information with BNB before collection.",
+  },
+  {
+    title: "RTGS / INR Remittance",
+    category: "INR Payment",
+    icon: Landmark,
+    summary:
+      "Send INR payments for approved purposes such as education, import of goods, medical expenses, labour payments, and service payments.",
+    whoCanUse: "BNB account holders, traders, agencies, and approved individuals making eligible INR payments.",
+    keyPoints: [
+      "A BNB account is required for remittance.",
+      "BTFN application is required for most eligible cross-border payments.",
+      "NEFT may apply for lower-value payments and RTGS for higher-value payments, depending on the payment amount and channel rules.",
+      "Payments must follow RMA and bank requirements.",
+    ],
+    documents: [
+      "Duly signed RTGS form",
+      "Undertaking letter where required",
+      "Invoice with beneficiary account details",
+      "Passport/student ID for education payments",
+      "Valid license for import payments",
+      "Work permit and construction approval for labour payment where applicable",
+      "Contract agreement for service payments where applicable",
+    ],
+    steps: [
+      "Prepare the documents based on payment purpose.",
+      "Create the BTFN application where required.",
+      "Submit the RTGS form and supporting documents to BNB.",
+      "BNB verifies documents, account balance, purpose, and compliance requirements.",
+      "The INR payment is processed through the approved payment channel.",
+    ],
+    charges:
+      "Indicative RTGS charges in the SOP are based on amount slabs. Customers should confirm the latest applicable charges with BNB before making payment.",
+  },
+  {
+    title: "Letter of Credit (LC)",
+    category: "Trade Finance",
+    icon: FileText,
+    summary:
+      "Support for importers who need a bank-backed payment arrangement for international trade transactions.",
+    whoCanUse: "Eligible importers, business clients, and approved trade customers.",
+    keyPoints: [
+      "LC applications require verification, approval, margin/deposit arrangement, and regulatory compliance checks.",
+      "BTFN registration and application are required for goods or services related LC processing.",
+      "Property security may be considered for part of LC value subject to bank requirements.",
+      "LC documents must comply with LC terms to avoid discrepancies and delays.",
+    ],
+    documents: [
+      "Duly signed LC form with forwarding letter",
+      "Proforma invoice",
+      "BTFN goods/services application",
+      "NOC from other financial institutions for new clients where required",
+      "Margin money/deposit arrangement as prescribed by the bank",
+      "Property documents if property security is used",
+      "Guarantor authorization letter if property is not in applicant’s name",
+    ],
+    steps: [
+      "Customer submits LC application and supporting documents.",
+      "BNB verifies documents, BTFN application, loan status, CIB report, and security arrangement.",
+      "The LC request is appraised and submitted for approval.",
+      "After approval, BNB issues the LC through SWIFT to the advising bank.",
+      "When documents arrive, BNB checks compliance and coordinates payment or acceptance with the applicant.",
+    ],
+    charges:
+      "The SOP lists LC opening commission, SWIFT/cable charges, commitment charges, discrepancy charges, reimbursement charges, and usance charges where applicable. Customers should confirm latest rates with BNB.",
+  },
+  {
+    title: "DSA / Foreign Exchange Release",
+    category: "Forex Release",
+    icon: CreditCard,
+    summary:
+      "Foreign exchange release support for approved official travel, DSA, and eligible foreign exchange needs.",
+    whoCanUse: "Eligible institutions, officials, and approved applicants based on travel and regulatory requirements.",
+    keyPoints: [
+      "DSA release is generally based on forwarding letter, air ticket, passport, and applicable slab.",
+      "Release should normally be processed close to the travel date as per internal requirement.",
+      "Third-party collection requires authorization.",
+      "RMA approval may be required for some foreign exchange releases.",
+    ],
+    documents: [
+      "Forwarding letter from the institution",
+      "Air ticket",
+      "Passport copy",
+      "Authorization letter for third-party collection where applicable",
+      "RMA approval letter or release order where required",
+    ],
+    steps: [
+      "Submit the forwarding letter and travel documents.",
+      "BNB verifies signature, eligibility, travel date, and applicable slab.",
+      "BNB updates required portal/records where applicable.",
+      "After approval, the applicant is guided to the forex counter for release.",
+    ],
+    charges:
+      "Charges and rates should be confirmed with the forex counter based on the latest approved rate and rules.",
+  },
+  {
+    title: "Daily Forex Rates",
+    category: "Forex Information",
+    icon: Building2,
+    summary:
+      "Reference information for foreign exchange rates used for eligible international banking transactions.",
+    whoCanUse: "Customers making foreign exchange, remittance, inward remittance, or trade-related transactions.",
+    keyPoints: [
+      "Exchange rates may change daily.",
+      "Different rate types may apply depending on transaction type, such as TT buying, TT selling, bill buying, or other approved rate categories.",
+      "The final applicable rate is confirmed by the bank at the time of processing.",
+    ],
+    documents: ["No document required for general rate inquiry."],
+    steps: [
+      "Check the latest rate displayed or confirmed by BNB.",
+      "Ask the bank which rate applies to your transaction type.",
+      "Confirm the final amount before processing the transaction.",
+    ],
+    charges:
+      "Exchange rates and charges depend on the transaction type and currency.",
+  },
+];
+
+const purposes = [
+  {
+    purpose: "Living allowance",
+    form: "MT103 or RTGS form, depending on currency/payment route",
+    documents: "BTFN, undertaking letter, valid passport, student ID or visa-validity support where required.",
+  },
+  {
+    purpose: "Tuition fee",
+    form: "MT103 or RTGS form",
+    documents: "BTFN, undertaking letter, passport, admission/acceptance letter or valid student card, invoice with beneficiary account details.",
+  },
+  {
+    purpose: "Import of goods",
+    form: "MT103 or RTGS form",
+    documents: "BTFN, undertaking letter, invoice, valid business license, import license or equivalent document where required.",
+  },
+  {
+    purpose: "Medical payment",
+    form: "MT103 or RTGS form",
+    documents: "Invoice with medical institution account details and recommendation/appointment letter.",
+  },
+  {
+    purpose: "Tour refund",
+    form: "MT103 where applicable",
+    documents: "DOI letter where applicable, bank details, proof of original receipt, and same-source refund details unless RMA approval is obtained.",
+  },
+  {
+    purpose: "Other service payments",
+    form: "MT103 or RTGS form",
+    documents: "BTFN, invoice, beneficiary account details, and contract agreement where applicable.",
+  },
+];
+
+const faqs = [
+  {
+    q: "Can I use this website as official bank confirmation?",
+    a: "No. This is a client-friendly project directory based on SOP content. Customers must confirm latest rules, charges, exchange rates, and eligibility directly with Bhutan National Bank.",
+  },
+  {
+    q: "Do I need a BNB account for outward remittance?",
+    a: "Yes. The SOP states that remitters need to have an account with BNB for remittances.",
+  },
+  {
+    q: "Can business entities claim MoneyGram, RIA, or Instant Cash?",
+    a: "No. The SOP notes that money received in the name of business entities or organizations is not eligible to claim for these money transfer services.",
+  },
+  {
+    q: "What happens if my inward remittance details are incomplete?",
+    a: "BNB may follow up with correspondent banks or the client for missing beneficiary details, sender details, or payment purpose before crediting the fund.",
+  },
+  {
+    q: "Are personal outward payments allowed?",
+    a: "The SOP states that personal payments are generally not made unless approved by the Royal Monetary Authority where required.",
+  },
+  {
+    q: "Where should I confirm latest foreign exchange rules?",
+    a: "Customers should refer to the latest RMA regulations and confirm directly with BNB before processing cross-border payments.",
+  },
+];
+
+const clientSteps = [
+  "Identify your service: remittance, LC, money transfer claim, forex release, or inward receipt.",
+  "Prepare documents based on your payment purpose and customer type.",
+  "Create BTFN application if your transaction requires it.",
+  "Submit forms and documents to BNB for verification.",
+  "BNB checks compliance, account balance, exchange rate, charges, and beneficiary details.",
+  "After approval, the transaction is processed and advice/receipt is provided where applicable.",
+];
+
+const quickStats = [
+  { label: "Core service areas", value: "9+" },
+  { label: "Money transfer partners", value: "3" },
+  { label: "Client guide sections", value: "6" },
+  { label: "Compliance focus", value: "KYC/AML" },
+];
+
+export default function BNBInternationalBankingDirectory() {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("All");
+  const [activeService, setActiveService] = useState(services[0]);
+
+  const categories = ["All", ...new Set(services.map((service) => service.category))];
+
+  const filteredServices = useMemo(() => {
+    return services.filter((service) => {
+      const searchable = `${service.title} ${service.category} ${service.summary} ${service.keyPoints.join(" ")} ${service.documents.join(" ")}`.toLowerCase();
+      const matchesQuery = searchable.includes(query.toLowerCase());
+      const matchesCategory = category === "All" || service.category === category;
+      return matchesQuery && matchesCategory;
+    });
+  }, [query, category]);
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <header className="sticky top-0 z-30 border-b bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
+              <Globe2 className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Client Reference Portal</p>
+              <h1 className="text-lg font-bold">BNB International Banking Directory</h1>
+            </div>
+          </div>
+          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
+            <a href="#services">Services</a>
+            <a href="#documents">Documents</a>
+            <a href="#process">Process</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+          <Button className="rounded-2xl">Contact BNB</Button>
+        </div>
+      </header>
+
+      <main>
+        <section className="mx-auto grid max-w-7xl gap-8 px-5 py-14 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+            <p className="mb-4 inline-flex rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm">
+              International banking made easier for clients
+            </p>
+            <h2 className="text-4xl font-bold leading-tight md:text-6xl">
+              A simple guide to BNB international banking services.
+            </h2>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
+              Explore outward remittance, inward remittance, trade finance, money transfer claims, RTGS/INR payments, forex release, and daily forex rate guidance in one organized client directory.
+            </p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Button className="rounded-2xl px-6 py-6 text-base" asChild>
+                <a href="#services">Browse Services <ArrowRight className="ml-2 h-4 w-4" /></a>
+              </Button>
+              <Button variant="outline" className="rounded-2xl px-6 py-6 text-base" asChild>
+                <a href="#documents">View Documents</a>
+              </Button>
+            </div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.45, delay: 0.1 }}>
+            <Card className="rounded-3xl border-0 shadow-xl">
+              <CardContent className="p-6">
+                <div className="rounded-3xl bg-slate-900 p-6 text-white">
+                  <p className="text-sm text-slate-300">What this portal helps with</p>
+                  <h3 className="mt-2 text-2xl font-bold">Find the right service, form, and documents faster.</h3>
+                  <p className="mt-4 text-sm leading-6 text-slate-300">
+                    This website translates internal SOP content into simple customer guidance without exposing staff-only steps or system credentials.
+                  </p>
+                </div>
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  {quickStats.map((item) => (
+                    <div key={item.label} className="rounded-2xl bg-slate-100 p-4">
+                      <p className="text-2xl font-bold">{item.value}</p>
+                      <p className="mt-1 text-xs font-medium text-slate-500">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </section>
+
+        <section className="bg-white py-10">
+          <div className="mx-auto grid max-w-7xl gap-5 px-5 md:grid-cols-4">
+            {[
+              { icon: ShieldCheck, title: "Compliant", text: "Guided by KYC, AML/CFT, RMA, and bank requirements." },
+              { icon: FileText, title: "Document-ready", text: "Clear checklists for common customer purposes." },
+              { icon: Users, title: "Client-friendly", text: "Simple explanations instead of internal banking language." },
+              { icon: Clock, title: "Time-saving", text: "Helps clients prepare before visiting the bank." },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <Card key={item.title} className="rounded-3xl border-slate-200 shadow-sm">
+                  <CardContent className="p-5">
+                    <Icon className="h-7 w-7 text-slate-700" />
+                    <h3 className="mt-4 font-bold">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+        <section id="services" className="mx-auto max-w-7xl px-5 py-14">
+          <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Service Directory</p>
+              <h2 className="mt-2 text-3xl font-bold">Products and services</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+                Search by service, purpose, document, or category. Select a card to view the full client guide.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="relative">
+                <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search LC, RIA, tuition, import..."
+                  className="w-full rounded-2xl border bg-white px-12 py-3 outline-none focus:ring-2 focus:ring-slate-300 sm:w-80"
+                />
+              </div>
+              <select
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                className="rounded-2xl border bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300"
+              >
+                {categories.map((item) => (
+                  <option key={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="grid gap-4">
+              {filteredServices.map((service) => {
+                const Icon = service.icon;
+                const selected = activeService.title === service.title;
+                return (
+                  <button
+                    key={service.title}
+                    onClick={() => setActiveService(service)}
+                    className={`rounded-3xl border p-5 text-left transition hover:-translate-y-1 hover:shadow-lg ${selected ? "border-slate-900 bg-slate-900 text-white shadow-lg" : "border-slate-200 bg-white"}`}
+                  >
+                    <div className="flex gap-4">
+                      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${selected ? "bg-white/10" : "bg-slate-100"}`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <p className={`text-xs font-semibold uppercase tracking-wide ${selected ? "text-slate-300" : "text-slate-500"}`}>{service.category}</p>
+                        <h3 className="mt-1 text-lg font-bold">{service.title}</h3>
+                        <p className={`mt-2 text-sm leading-6 ${selected ? "text-slate-300" : "text-slate-600"}`}>{service.summary}</p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <Card className="rounded-3xl border-0 bg-white shadow-xl">
+              <CardContent className="p-6 md:p-8">
+                <div className="mb-6 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Selected service</p>
+                    <h3 className="mt-2 text-3xl font-bold">{activeService.title}</h3>
+                    <p className="mt-3 leading-7 text-slate-600">{activeService.summary}</p>
+                  </div>
+                  <div className="hidden rounded-2xl bg-slate-100 p-4 md:block">
+                    {React.createElement(activeService.icon, { className: "h-7 w-7" })}
+                  </div>
+                </div>
+
+                <div className="grid gap-5">
+                  <InfoBlock title="Who can use this" items={[activeService.whoCanUse]} icon={Users} />
+                  <InfoBlock title="Important points" items={activeService.keyPoints} icon={AlertTriangle} />
+                  <InfoBlock title="Required documents" items={activeService.documents} icon={FileText} />
+                  <InfoBlock title="Simple process" items={activeService.steps} icon={CheckCircle2} ordered />
+                  <div className="rounded-3xl bg-slate-50 p-5">
+                    <div className="flex items-center gap-2">
+                      <ReceiptText className="h-5 w-5" />
+                      <h4 className="font-bold">Charges / rate note</h4>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{activeService.charges}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <section id="documents" className="bg-white py-14">
+          <div className="mx-auto max-w-7xl px-5">
+            <div className="mb-8">
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Purpose-based Guide</p>
+              <h2 className="mt-2 text-3xl font-bold">Common payment purposes and documents</h2>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+                Document requirements may change based on RMA regulations, transaction amount, customer type, and bank verification. Always confirm the latest requirement before submission.
+              </p>
+            </div>
+            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+              <div className="grid bg-slate-900 px-5 py-4 text-sm font-semibold text-white md:grid-cols-[0.8fr_1fr_1.5fr]">
+                <p>Purpose</p>
+                <p className="hidden md:block">Form</p>
+                <p className="hidden md:block">Main documents</p>
+              </div>
+              {purposes.map((item, index) => (
+                <div key={item.purpose} className={`grid gap-2 px-5 py-5 text-sm md:grid-cols-[0.8fr_1fr_1.5fr] ${index !== purposes.length - 1 ? "border-b" : ""}`}>
+                  <p className="font-bold">{item.purpose}</p>
+                  <p className="text-slate-600"><span className="font-semibold md:hidden">Form: </span>{item.form}</p>
+                  <p className="leading-6 text-slate-600"><span className="font-semibold md:hidden">Documents: </span>{item.documents}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="process" className="mx-auto max-w-7xl px-5 py-14">
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Customer Journey</p>
+              <h2 className="mt-2 text-3xl font-bold">How clients should prepare</h2>
+              <p className="mt-3 leading-7 text-slate-600">
+                This general process helps clients avoid delays by preparing forms, documents, account details, and payment purpose clearly before visiting or contacting BNB.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {clientSteps.map((step, index) => (
+                <Card key={step} className="rounded-3xl border-slate-200 bg-white shadow-sm">
+                  <CardContent className="p-5">
+                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-sm font-bold text-white">
+                      {index + 1}
+                    </div>
+                    <p className="text-sm leading-6 text-slate-700">{step}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-slate-900 py-14 text-white">
+          <div className="mx-auto grid max-w-7xl gap-6 px-5 md:grid-cols-3">
+            <div className="md:col-span-1">
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">Compliance Reminder</p>
+              <h2 className="mt-2 text-3xl font-bold">Important before you transact</h2>
+            </div>
+            <div className="grid gap-4 md:col-span-2 md:grid-cols-2">
+              {[
+                "All international transactions are subject to KYC, AML/CFT, sanctions screening, and bank due diligence.",
+                "BNB may reject, delay, or request more documents if information is incomplete or does not meet requirements.",
+                "Customers should use accurate sender, receiver, account, invoice, and purpose details.",
+                "Latest RMA rules, bank charges, foreign bank charges, and exchange rates should be confirmed before processing.",
+              ].map((note) => (
+                <div key={note} className="rounded-3xl bg-white/10 p-5">
+                  <ShieldCheck className="mb-3 h-5 w-5 text-slate-300" />
+                  <p className="text-sm leading-6 text-slate-300">{note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="faq" className="mx-auto max-w-7xl px-5 py-14">
+          <div className="mb-8">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">FAQ</p>
+            <h2 className="mt-2 text-3xl font-bold">Common client questions</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {faqs.map((item) => (
+              <Card key={item.q} className="rounded-3xl border-slate-200 bg-white shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex gap-3">
+                    <HelpCircle className="mt-1 h-5 w-5 shrink-0 text-slate-500" />
+                    <div>
+                      <h3 className="font-bold">{item.q}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.a}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-5 pb-14">
+          <Card className="rounded-3xl border-0 bg-white shadow-xl">
+            <CardContent className="grid gap-6 p-8 md:grid-cols-[1fr_1fr] md:items-center">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Contact and support</p>
+                <h2 className="mt-2 text-3xl font-bold">Need help with a transaction?</h2>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  Contact the nearest BNB branch or International Banking support team to confirm requirements before submitting documents.
+                </p>
+              </div>
+              <div className="grid gap-3">
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                  <MapPin className="h-5 w-5" />
+                  <span className="text-sm font-medium">Bhutan National Bank branch or extension office</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                  <Phone className="h-5 w-5" />
+                  <span className="text-sm font-medium">Confirm latest phone number from official BNB channels</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                  <Mail className="h-5 w-5" />
+                  <span className="text-sm font-medium">Use official BNB email or branch contact for document confirmation</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      </main>
+
+      <footer className="border-t bg-white py-6">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
+          <p>© 2026 BNB International Banking Directory Project</p>
+          <p>Client guide only. Confirm official requirements with Bhutan National Bank.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function InfoBlock({ title, items, icon: Icon, ordered = false }) {
+  return (
+    <div className="rounded-3xl bg-slate-50 p-5">
+      <div className="mb-3 flex items-center gap-2">
+        <Icon className="h-5 w-5" />
+        <h4 className="font-bold">{title}</h4>
+      </div>
+      {ordered ? (
+        <ol className="space-y-2 text-sm leading-6 text-slate-600">
+          {items.map((item, index) => (
+            <li key={item} className="flex gap-2">
+              <span className="font-semibold text-slate-900">{index + 1}.</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <ul className="space-y-2 text-sm leading-6 text-slate-600">
+          {items.map((item) => (
+            <li key={item} className="flex gap-2">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
